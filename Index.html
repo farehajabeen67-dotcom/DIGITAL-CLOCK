@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Clock & Countdown Timer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-bottom: 25px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .clock-container {
+            margin-bottom: 30px;
+        }
+        
+        .time {
+            font-size: 5rem;
+            font-weight: 700;
+            margin: 10px 0;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        
+        .date {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+        
+        .timer-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .timer-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .input-group label {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .input-group input {
+            width: 70px;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            background: #fdbb2d;
+            color: #1a2a6c;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: #ffcc44;
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #555;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .timer-display {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 15px 0;
+            min-height: 74px;
+        }
+        
+        .mode-toggle {
+            margin-top: 20px;
+        }
+        
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        @media (max-width: 500px) {
+            .time {
+                font-size: 3.5rem;
+            }
+            
+            .timer-inputs {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Digital Clock & Timer</h1>
+        
+        <div class="clock-container">
+            <div class="time" id="time">00:00:00</div>
+            <div class="date" id="date">Monday, January 1, 2023</div>
+        </div>
+        
+        <div class="timer-container">
+            <h2>Countdown Timer</h2>
+            
+            <div class="timer-inputs">
+                <div class="input-group">
+                    <label for="hours">Hours</label>
+                    <input type="number" id="hours" min="0" max="99" value="0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="minutes">Minutes</label>
+                    <input type="number" id="minutes" min="0" max="59" value="0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="seconds">Seconds</label>
+                    <input type="number" id="seconds" min="0" max="59" value="0">
+                </div>
+            </div>
+            
+            <div class="timer-display" id="timer-display">00:00:00</div>
+            
+            <div class="buttons">
+                <button id="start-btn">Start</button>
+                <button id="pause-btn" disabled>Pause</button>
+                <button id="reset-btn" disabled>Reset</button>
+            </div>
+        </div>
+        
+        <div class="mode-toggle">
+            <button id="toggle-mode" class="toggle-btn">Switch to Timer Mode</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const timeElement = document.getElementById('time');
+        const dateElement = document.getElementById('date');
+        const hoursInput = document.getElementById('hours');
+        const minutesInput = document.getElementById('minutes');
+        const secondsInput = document.getElementById('seconds');
+        const timerDisplay = document.getElementById('timer-display');
+        const startBtn = document.getElementById('start-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const toggleBtn = document.getElementById('toggle-mode');
+        
+        // Variables
+        let timerInterval = null;
+        let timerRunning = false;
+        let totalSeconds = 0;
+        let remainingSeconds = 0;
+        let isClockMode = true;
+        
+        // Update clock function
+        function updateClock() {
+            const now = new Date();
+            
+            // Format time
+            const time = now.toLocaleTimeString('en-US', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            // Format date
+            const date = now.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            // Update DOM
+            timeElement.textContent = time;
+            dateElement.textContent = date;
+        }
+        
+        // Initialize clock
+        updateClock();
+        setInterval(updateClock, 1000);
+        
+        // Format time for timer display
+        function formatTime(seconds) {
+            const hrs = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // Update timer display
+        function updateTimerDisplay() {
+            timerDisplay.textContent = formatTime(remainingSeconds);
+        }
+        
+        // Start timer
+        function startTimer() {
+            if (timerRunning) return;
+            
+            if (!timerInterval) {
+                // Get values from inputs if starting fresh
+                if (remainingSeconds === 0) {
+                    const hours = parseInt(hoursInput.value) || 0;
+                    const minutes = parseInt(minutesInput.value) || 0;
+                    const seconds = parseInt(secondsInput.value) || 0;
+                    
+                    totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                    remainingSeconds = totalSeconds;
+                    
+                    if (remainingSeconds <= 0) {
+                        alert("Please enter a valid time!");
+                        return;
+                    }
+                }
+                
+                updateTimerDisplay();
+                
+                timerInterval = setInterval(() => {
+                    remainingSeconds--;
+                    
+                    if (remainingSeconds <= 0) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                        timerRunning = false;
+                        timerDisplay.textContent = "Time's up!";
+                        startBtn.disabled = true;
+                        pauseBtn.disabled = true;
+                        resetBtn.disabled = false;
+                        
+                        // Play alert sound
+                        const audio = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU');
+                        audio.play().catch(e => console.log("Audio play failed:", e));
+                    } else {
+                        updateTimerDisplay();
+                    }
+                }, 1000);
+                
+                timerRunning = true;
+                startBtn.disabled = true;
+                pauseBtn.disabled = false;
+                resetBtn.disabled = false;
+                hoursInput.disabled = true;
+                minutesInput.disabled = true;
+                secondsInput.disabled = true;
+            }
+        }
+        
+        // Pause timer
+        function pauseTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                timerRunning = false;
+                startBtn.disabled = false;
+                pauseBtn.disabled = true;
+                startBtn.textContent = "Resume";
+            }
+        }
+        
+        // Reset timer
+        function resetTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            timerRunning = false;
+            remainingSeconds = 0;
+            timerDisplay.textContent = formatTime(0);
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            resetBtn.disabled = true;
+            startBtn.textContent = "Start";
+            hoursInput.disabled = false;
+            minutesInput.disabled = false;
+            secondsInput.disabled = false;
+            
+            // Reset input values
+            hoursInput.value = "0";
+            minutesInput.value = "0";
+            secondsInput.value = "0";
+        }
+        
+        // Toggle between clock and timer mode
+        function toggleMode() {
+            isClockMode = !isClockMode;
+            
+            if (isClockMode) {
+                document.querySelector('.clock-container').style.display = 'block';
+                document.querySelector('.timer-container').style.display = 'none';
+                toggleBtn.textContent = "Switch to Timer Mode";
+            } else {
+                document.querySelector('.clock-container').style.display = 'none';
+                document.querySelector('.timer-container').style.display = 'block';
+                toggleBtn.textContent = "Switch to Clock Mode";
+                resetTimer();
+            }
+        }
+        
+        // Validate input fields
+        function validateInput(input, max) {
+            let value = parseInt(input.value) || 0;
+            
+            if (value < 0) {
+                input.value = "0";
+            } else if (value > max) {
+                input.value = max.toString();
+            }
+        }
+        
+        // Event listeners
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        resetBtn.addEventListener('click', resetTimer);
+        toggleBtn.addEventListener('click', toggleMode);
+        
+        hoursInput.addEventListener('change', () => validateInput(hoursInput, 99));
+        minutesInput.addEventListener('change', () => validateInput(minutesInput, 59));
+        secondsInput.addEventListener('change', () => validateInput(secondsInput, 59));
+        
+        // Initialize timer display
+        updateTimerDisplay();
+    </script>
+</body>
+</html>
