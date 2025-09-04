@@ -24,7 +24,3 @@ The core functionality relies on the JavaScript `Date()` object to get the curre
 ## 🤝 Contributing
 
 This is a learning project, but suggestions and improvements are welcome! Feel free to fork the repo and submit a pull request.
-
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
